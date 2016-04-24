@@ -125,15 +125,15 @@ class GAnalytics {
 	* @return	void
 	*/
 
-	static public function sendTiming( sCat : String , iInterval : Int , sName : String , sLabel : String ) : Void {
+	static public function sendTiming( sCat : String , sName : String , sLabel : String , iValue : Int ) : Void {
 		#if (android && openfl)
 
-		if (ganalytics_sendTiming_jni == null) ganalytics_sendTiming_jni = JNI.createStaticMethod ("org.haxe.extension.GAnalytics", "sendTiming", "(Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
-		ganalytics_sendTiming_jni(sCat, iInterval, sName, sLabel);
+		if (ganalytics_sendTiming_jni == null) ganalytics_sendTiming_jni = JNI.createStaticMethod ("org.haxe.extension.GAnalytics", "sendTiming", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;I)V");
+		ganalytics_sendTiming_jni(sCat, sName, sLabel, iValue);
 		
 		#elseif ios
 		
-		ganalytics_sendTiming(sCat, iInterval, sName, sLabel);
+		ganalytics_sendTiming(sCat, iValue, sName, sLabel);
 		
 		#end
 	}

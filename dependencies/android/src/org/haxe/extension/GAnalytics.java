@@ -1,14 +1,10 @@
 package org.haxe.extension;
 
 
-import com.google.analytics.tracking.android.EasyTracker;
-import com.google.analytics.tracking.android.Fields;
-import com.google.analytics.tracking.android.GAServiceManager;
-import com.google.analytics.tracking.android.GoogleAnalytics;
-import com.google.analytics.tracking.android.Logger.LogLevel;
-import com.google.analytics.tracking.android.Logger;
-import com.google.analytics.tracking.android.MapBuilder;
-import com.google.analytics.tracking.android.Tracker;
+import com.google.android.gms.analytics.ExceptionReporter;
+import com.google.android.gms.analytics.GoogleAnalytics;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 
 
 import android.app.Activity;
@@ -95,8 +91,17 @@ public class GAnalytics extends Extension {
 		*/
 		public static void startSession( String sUA_code , int iPeriod ) {
 			//trace("startSession ::: "+sUA_code+" - "+iPeriod);
-			_gaTracker = GoogleAnalytics.getInstance( mainContext ).getTracker( sUA_code );
+			_gaTracker = GoogleAnalytics.getInstance( mainContext ).newTracker( sUA_code );
+			_gaTracker.enableExceptionReporting( true );
 			setDispatch_period( iPeriod );
+			
+			Thread.UncaughtExceptionHandler handler = new ExceptionReporter(
+				_gaTracker,
+				Thread.getDefaultUncaughtExceptionHandler(),
+				mainContext
+			);
+			
+			Thread.setDefaultUncaughtExceptionHandler(handler);
 		}
 
 		/**
@@ -106,7 +111,7 @@ public class GAnalytics extends Extension {
 		* @return	void
 		*/
 		public static void setDispatch_period( int iPeriod ) {
-			GAServiceManager.getInstance().setLocalDispatchPeriod(iPeriod);
+			GoogleAnalytics.getInstance( mainContext ).setLocalDispatchPeriod( iPeriod );
 		}
 
 		/**
@@ -116,7 +121,7 @@ public class GAnalytics extends Extension {
 		* @return	void
 		*/
 		public static void dispatch( ){
-			GAServiceManager.getInstance().dispatchLocalHits( );
+			GoogleAnalytics.getInstance( mainContext ).dispatchLocalHits();
 		}
 
 		/**
@@ -127,7 +132,8 @@ public class GAnalytics extends Extension {
 		*/
 		public static void trackScreen( String sScreen ){
 			//trace("trackScreen ::: "+sScreen);
-			_gaTracker.send( MapBuilder.createAppView( ).set( Fields.SCREEN_NAME , sScreen ).build( ) );
+			_gaTracker.setScreenName( sScreen );
+			_gaTracker.send( new HitBuilders.ScreenViewBuilder().build() );
 
 		}
 
@@ -138,7 +144,13 @@ public class GAnalytics extends Extension {
 		* @return	void
 		*/
 		public static void trackEvent( String sCat , String sAction , String sLabel , int iVal ){
-			_gaTracker.send( MapBuilder.createEvent( sCat , sAction , sLabel , Long.valueOf( iVal ) ).build( ) );
+			_gaTracker.send( new HitBuilders.EventBuilder()
+				.setCategory( sCat )
+				.setAction( sAction )
+				.setLabel( sLabel )
+				.setValue( Long.valueOf( iVal ) )
+				.build()
+			);
 		}
 
 		/**
@@ -148,7 +160,12 @@ public class GAnalytics extends Extension {
 		* @return	void
 		*/
 		public static void trackSocial( String sSocial_network , String sAction , String sTarget ){
-			_gaTracker.send( MapBuilder.createSocial( sSocial_network , sAction , sTarget ).build( ) );
+			_gaTracker.send( new HitBuilders.SocialBuilder()
+				.setNetwork( sSocial_network )
+				.setAction( sAction )
+				.setTarget( sTarget )
+				.build()
+			);
 		}
 
 		/**
@@ -157,8 +174,14 @@ public class GAnalytics extends Extension {
 		* @public
 		* @return	void
 		*/
-		public static void sendTiming( String sCat , int iInterval , String sName , String sLabel ){
-			_gaTracker.send( MapBuilder.createTiming( sCat , Long.valueOf( iInterval ) , sName , sLabel ).build( ) );
+		public static void sendTiming( String sCat , String sName , String sLabel, int iVal ){
+			_gaTracker.send( new HitBuilders.TimingBuilder()
+				.setCategory( sCat )
+				.setVariable( sName )
+				.setLabel( sLabel )
+				.setValue( Long.valueOf( iVal ) )
+				.build()
+			);
 		}
 
 	// -------o protected
@@ -225,7 +248,7 @@ public class GAnalytics extends Extension {
 	 */
 	public void onRestart () {
 		
-		EasyTracker.getInstance( mainContext ).activityStop( mainActivity );
+		
 		
 	}
 	
@@ -248,8 +271,7 @@ public class GAnalytics extends Extension {
 	 */
 	public void onStart () {
 		
-		EasyTracker.getInstance( mainContext ).activityStart( mainActivity );
-		GoogleAnalytics.getInstance( mainContext ).getLogger( ).setLogLevel( LogLevel.VERBOSE );
+		GoogleAnalytics.getInstance( mainContext ).reportActivityStart ( mainActivity );
 		
 	}
 	
@@ -260,7 +282,7 @@ public class GAnalytics extends Extension {
 	 */
 	public void onStop () {
 		
-		
+		GoogleAnalytics.getInstance( mainContext ).reportActivityStop ( mainActivity );
 		
 	}
 	
