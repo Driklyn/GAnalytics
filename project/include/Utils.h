@@ -11,7 +11,7 @@ namespace ganalytics {
 	void sendSocial( const char *sSocial_network , const char *sAction , const char *sTarget );
 	void setCustom_dimension( int iIndex , const char *sValue );
 	void setCustom_metric( int iIndex , int iMetric );
-	void sendTiming( const char *sCat , const char *sName , const char *sLabel, int iValue );
+	void sendTiming( const char *sCat ,  int iValue, const char *sName , const char *sLabel );
 	void stopSession( );
 	
 }

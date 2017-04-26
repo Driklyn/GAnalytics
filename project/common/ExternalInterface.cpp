@@ -52,8 +52,8 @@ using namespace ganalytics;
 	}
 	DEFINE_PRIM( ganalytics_setCustom_metric , 2 );
 
-	static value ganalytics_sendTiming( value sCat , value name , value label , value value ){
-		sendTiming( val_string( sCat ) , val_string( name ) , val_string( label ) , val_int( value ) );
+	static value ganalytics_sendTiming( value sCat , value interval , value name , value label ){
+		sendTiming( val_string( sCat ) , val_int( interval ) , val_string( name ) , val_string( label ) );
 		return alloc_null( );
 	}
 	DEFINE_PRIM( ganalytics_sendTiming , 4 );
