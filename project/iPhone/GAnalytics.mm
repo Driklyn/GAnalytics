@@ -27,8 +27,8 @@ namespace ganalytics {
 		[tracker send:[[GAIDictionaryBuilder createAppView]  build]];
 	}
 
-	void sendEvent( const char *sCat , const char *sAction , const char *sLabel , int iValue ){
-		NSString *NS_Cat = [ [NSString alloc] initWithUTF8String:sCat];
+	void sendEvent( const char *sData){
+		/*NSString *NS_Cat = [ [NSString alloc] initWithUTF8String:sCat];
 		NSString *NS_Act = [ [NSString alloc] initWithUTF8String:sAction];
 		NSString *NS_Lab = [ [NSString alloc] initWithUTF8String:sLabel];
 		//NSLog( @"SendEvent cat:%@ act:%@ label:%@ val%i" , NS_Cat , NS_Act , NS_Lab , iValue );
@@ -37,7 +37,7 @@ namespace ganalytics {
 		[tracker send:[[GAIDictionaryBuilder createEventWithCategory:NS_Cat
                                                       action:NS_Act
                                                        label:NS_Lab
-                                                       value:[NSNumber numberWithInt:iValue]] build]];
+                                                       value:[NSNumber numberWithInt:iValue]] build]];*/
 	}
 
 	void setCustom_dimension( int iIndex , const char *sValue ){

@@ -29,16 +29,13 @@ using namespace ganalytics;
 	}
 	DEFINE_PRIM( ganalytics_sendScreenView , 1 );
 
-	static value ganalytics_sendEvent( value sCat , value sAction , value sLabel , value iValue ){
+	static value ganalytics_sendEvent( value data){
 		sendEvent(
-					val_string( sCat ),
-					val_string( sAction ),
-					val_string( sLabel ),
-					val_int( iValue )
+					val_string( data )
 				);
 		return alloc_null( );
 	}
-	DEFINE_PRIM( ganalytics_sendEvent , 4 );
+	DEFINE_PRIM( ganalytics_sendEvent , 1 );
 
 	static value ganalytics_setCustom_dimension( value iIndex , value sValue ){
 		setCustom_dimension( val_int( iIndex ) , val_string( sValue ) );
