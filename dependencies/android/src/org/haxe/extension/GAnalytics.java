@@ -104,7 +104,8 @@ public class GAnalytics extends Extension {
 		public static void startSession( String sUA_code , int iPeriod ) {
 			//trace("startSession ::: "+sUA_code+" - "+iPeriod);
 			_gaTracker = GoogleAnalytics.getInstance( mainContext ).newTracker( sUA_code );
-			_gaTracker.enableExceptionReporting( true );
+			_gaTracker.enableExceptionReporting(true);
+			_gaTracker.enableAdvertisingIdCollection(true);
 			setDispatch_period( iPeriod );
 			
 			Thread.UncaughtExceptionHandler handler = new ExceptionReporter(
@@ -181,6 +182,77 @@ public class GAnalytics extends Extension {
 					Log.v("GAnalytics", "trackEvent Success!" + builder.build());
 				} catch (final JSONException e) {
 					Log.e("GAnalytics", "trackEvent Json parsing error: " + e);
+				}
+			}
+		}
+		/**
+		 *
+		 *
+		 * @public
+		 * @return	void
+		 */
+		public static void sendTiming(String datas){
+			if (datas != null) {
+				try {
+					JSONObject jObject = new JSONObject(datas);
+					HitBuilders.TimingBuilder builder = new HitBuilders.TimingBuilder();
+					builder.setCategory(jObject.getString("timingCategory"));
+					builder.setVariable(jObject.getString("timingVariable"));
+					builder.setValue(jObject.getLong("timingValue"));
+					if (jObject.has("timingLabel")) {
+						builder.setLabel(jObject.getString("timingLabel"));
+					}
+					parseAdditionalParams(builder, jObject);
+					_gaTracker.send(builder.build());
+					Log.v("GAnalytics", "sendTiming Success!" + builder.build());
+				} catch (final JSONException e) {
+					Log.e("GAnalytics", "sendTiming Json parsing error: " + e);
+				}
+			}
+		}
+
+		/**
+		 *
+		 *
+		 * @public
+		 * @return	void
+		 */
+		public static void trackSocial( String datas ){
+
+			if (datas != null) {
+				try {
+					JSONObject jObject = new JSONObject(datas);
+					HitBuilders.SocialBuilder builder = new HitBuilders.SocialBuilder();
+					builder.setNetwork(jObject.getString("socialNetwork"));
+					builder.setAction(jObject.getString("socialAction"));
+					builder.setTarget(jObject.getString("socialTarget"));
+					parseAdditionalParams(builder, jObject);
+					_gaTracker.send(builder.build());
+					Log.v("GAnalytics", "trackSocial Success!" + builder.build());
+				} catch (final JSONException e) {
+					Log.e("GAnalytics", "trackSocial Json parsing error: " + e);
+				}
+			}
+		}
+		/**
+		 *
+		 *
+		 * @public
+		 * @return	void
+		 */
+		public static void trackException( String datas ){
+
+			if (datas != null) {
+				try {
+					JSONObject jObject = new JSONObject(datas);
+					HitBuilders.ExceptionBuilder builder = new HitBuilders.ExceptionBuilder();
+					builder.setDescription(jObject.getString("exceptionDescription"));
+					builder.setFatal(jObject.getBoolean("fatal"));
+					parseAdditionalParams(builder, jObject);
+					_gaTracker.send(builder.build());
+					Log.v("GAnalytics", "trackException Success!" + builder.build());
+				} catch (final JSONException e) {
+					Log.e("GAnalytics", "trackException Json parsing error: " + e);
 				}
 			}
 		}
@@ -261,6 +333,18 @@ public class GAnalytics extends Extension {
 						builderMethod.invoke(builder, jObject.getBoolean("nonInteraction"));
 					} catch (Exception e) {
 						Log.e("GAnalytics", "nonInteraction: " + e);
+					}
+				}
+
+				if (jObject.has("setNewSession")) {
+					boolean ns = jObject.getBoolean("setNewSession");
+					if (ns) {
+						Method builderMethod = builder.getClass().getMethod("setNewSession");
+						try {
+							builderMethod.invoke(builder);
+						} catch (Exception e) {
+							Log.e("GAnalytics", "setNewSession: " + e);
+						}
 					}
 				}
 
@@ -430,38 +514,6 @@ public class GAnalytics extends Extension {
 				Log.e("GAnalytics", "getProduct: " + e);
 			}
 			return p;
-		}
-
-
-		/**
-		*
-		*
-		* @public
-		* @return	void
-		*/
-		public static void trackSocial( String sSocial_network , String sAction , String sTarget ){
-			_gaTracker.send( new HitBuilders.SocialBuilder()
-				.setNetwork( sSocial_network )
-				.setAction( sAction )
-				.setTarget( sTarget )
-				.build()
-			);
-		}
-
-		/**
-		*
-		*
-		* @public
-		* @return	void
-		*/
-		public static void sendTiming( String sCat , String sName , String sLabel, int iVal ){
-			_gaTracker.send( new HitBuilders.TimingBuilder()
-				.setCategory( sCat )
-				.setVariable( sName )
-				.setLabel( sLabel )
-				.setValue( Long.valueOf( iVal ) )
-				.build()
-			);
 		}
 
 	// -------o protected

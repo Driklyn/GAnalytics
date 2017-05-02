@@ -90,6 +90,7 @@ typedef THitBuilder =
 	@:optional var impressionList:String;
 	@:optional var promotionAction:EPromotionActionType;
 	@:optional var nonInteraction:Bool;
+	@:optional var setNewSession:Bool;
 
 	@:optional var customDimensions:Dynamic<String>;
 	@:optional var customMetrics:Dynamic<Float>;
@@ -117,18 +118,6 @@ typedef TExceptionHitBuilder =
 	var fatal:Bool;
 }
 
-typedef TItemHitBuilder =
-{
-	> THitBuilder,
-	var transactionID:String;
-	var name:String;
-	var SKU:String;
-	@:optional var category:String;
-	@:optional var currencyCode:String;
-	@:optional var price:Float;
-	@:optional var quantity:Int;
-}
-
 typedef TSocialHitBuilder =
 {
 	> THitBuilder,
@@ -141,20 +130,9 @@ typedef TTimingHitBuilder =
 {
 	> THitBuilder,
 	var timingCategory:String;
-	@:optional var timingName:String;
+	var timingVariable:String;
+	var timingValue:Int;
 	@:optional var timingLabel:String;
-	@:optional var timingInterval:Int;
-}
-
-typedef TTransactionHitBuilder =
-{
-	> THitBuilder,
-	var transactionID:String;
-	var affiliation:String;
-	@:optional var currencyCode:String;
-	@:optional var revenue:Float;
-	@:optional var tax:Float;
-	@:optional var shipping:Float;
 }
 
 class GAnalytics
@@ -208,7 +186,7 @@ class GAnalytics
 	* Track a screen view
 	*
 	* @public
-	* @param 	sScreen : Code of the screen to be tracked ( String )
+	* @param 	builder
 	* @return	void
 	*/
 
@@ -233,10 +211,7 @@ class GAnalytics
 	* Track a event
 	*
 	* @public
-	* @param	sCat		: Event category 	( String )
-	* @param	sCat		: Action 			( String )
-	* @param	sLabel	: Event label 		( String )
-	* @param	value	: Event value 		( Int )
+	* @param	builder
 	* @return	void
 	*/
 
@@ -258,84 +233,68 @@ class GAnalytics
 	*
 	*
 	* @public
-	* @param	sCat		: Event category 	( String )
-	* @param	iInterval	: Timing interval 	( Int )
-	* @param	sName	: Timing name 		( String )
-	* @param	sLabel	: Label 			( String )
+	* @param	builder
 	* @return	void
 	*/
 
-	static public function sendTiming(sCat:String, sName:String, sLabel:String, iValue:Int):Void
+	static public function sendTiming(builder:TTimingHitBuilder):Void
 	{
+		var jsonString:String = Json.stringify(builder);
 		#if (android && openfl)
 
-		if (ganalytics_sendTiming_jni == null) ganalytics_sendTiming_jni = JNI.createStaticMethod("org.haxe.extension.GAnalytics", "sendTiming", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;I)V");
-		ganalytics_sendTiming_jni(sCat, sName, sLabel, iValue);
+		if (ganalytics_sendTiming_jni == null) ganalytics_sendTiming_jni = JNI.createStaticMethod("org.haxe.extension.GAnalytics", "sendTiming", "(Ljava/lang/String;)V");
+		ganalytics_sendTiming_jni(jsonString);
 
 		#elseif ios
 
-		ganalytics_sendTiming(sCat, iValue, sName, sLabel);
+		ganalytics_sendTiming(jsonString);
 
 		#end
 	}
 
-	/**
-	* Set a custom dimension value
-	*
-	* @public
-	* @param	iIndex : Index of the dimension 	( Int )
-	* @param	sValue : Dimension value 		( String )
-	* @return	void
-	*/
-
-	static public function setCustom_dimension(iIndex:Int, sValue:String):Void
-	{
-		#if (android && openfl)
-
-		#elseif ios
-		ganalytics_setCustom_dimension(iIndex, sValue);
-		#end
-	}
-
-	/**
-	* Set a custom metric value
-	*
-	* @public
-	* @param	iIndex : Index of the metric 	( Int )
-	* @param	sValue : Metric value 		( String )
-	* @return	void
-	*/
-
-	static public function setCustom_metric(iIndex:Int, iValue:Int):Void
-	{
-		#if (android && openfl)
-
-		#elseif ios
-
-		ganalytics_setCustom_metric(iIndex, iValue);
-
-		#end
-	}
 
 	/**
 	* Track a social event
 	*
 	* @public
-	* @param 	sSocial_network :Targetted social network ( String )
-	* @param 	sAction : Action ( String )
+	* @param 	builder
 	* @return	void
 	*/
 
-	static public function trackSocial(sSocial_network:String, sAction:String, sTarget:String):Void
+	static public function trackSocial(builder:TSocialHitBuilder):Void
 	{
+		var jsonString:String = Json.stringify(builder);
 		#if (android && openfl)
 
-		if (ganalytics_trackSocial_jni == null) ganalytics_trackSocial_jni = JNI.createStaticMethod("org.haxe.extension.GAnalytics", "trackSocial", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
-		ganalytics_trackSocial_jni(sSocial_network, sAction, sTarget);
+		if (ganalytics_trackSocial_jni == null) ganalytics_trackSocial_jni = JNI.createStaticMethod("org.haxe.extension.GAnalytics", "trackSocial", "(Ljava/lang/String;)V");
+		ganalytics_trackSocial_jni(jsonString);
 
 		#elseif ios
 
-		ganalytics_sendSocial(sSocial_network, sAction, sTarget);
+		ganalytics_sendSocial(jsonString);
+
+		#end
+	}
+
+	/**
+	* Track an exception event
+	*
+	* @public
+	* @param 	builder
+	* @return	void
+	*/
+
+	static public function trackException(builder:TExceptionHitBuilder):Void
+	{
+		var jsonString:String = Json.stringify(builder);
+		#if (android && openfl)
+
+		if (ganalytics_trackException_jni == null) ganalytics_trackException_jni = JNI.createStaticMethod("org.haxe.extension.GAnalytics", "trackException", "(Ljava/lang/String;)V");
+		ganalytics_trackException_jni(jsonString);
+
+		#elseif ios
+
+		ganalytics_sendException(jsonString);
 
 		#end
 	}
@@ -354,13 +313,11 @@ class GAnalytics
 
 	private static var ganalytics_sendEvent = Lib.load("ganalytics", "ganalytics_sendEvent", 1);
 
-	private static var ganalytics_sendTiming = Lib.load("ganalytics", "ganalytics_sendTiming", 4);
+	private static var ganalytics_sendTiming = Lib.load("ganalytics", "ganalytics_sendTiming", 1);
 
-	private static var ganalytics_setCustom_dimension = Lib.load("ganalytics", "ganalytics_setCustom_dimension", 2);
+	private static var ganalytics_sendSocial = Lib.load("ganalytics", "ganalytics_sendSocial", 1);
 
-	private static var ganalytics_setCustom_metric = Lib.load("ganalytics", "ganalytics_setCustom_metric", 2);
-
-	private static var ganalytics_sendSocial = Lib.load("ganalytics", "ganalytics_sendSocial", 3);
+	private static var ganalytics_sendException = Lib.load("ganalytics", "ganalytics_sendException", 1);
 
 	#end
 
@@ -375,6 +332,8 @@ class GAnalytics
 	private static var ganalytics_sendTiming_jni:Dynamic;
 
 	private static var ganalytics_trackSocial_jni:Dynamic;
+
+	private static var ganalytics_trackException_jni:Dynamic;
 
 	#end
 

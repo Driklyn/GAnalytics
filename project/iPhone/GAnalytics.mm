@@ -58,8 +58,8 @@ namespace ganalytics {
 		   value:[NSString stringWithFormat:@"%d", iMetric]];
 	}
 
-	void sendTiming( const char *sCat , int iInterval , const char *sName , const char *sLabel ){
-		NSString *NS_Cat  	= [ [NSString alloc] initWithUTF8String:sCat];
+	void sendTiming( const char *sData ){
+		/*NSString *NS_Cat  	= [ [NSString alloc] initWithUTF8String:sCat];
 		NSString *NS_Name 	= [ [NSString alloc] initWithUTF8String:sName];
 		NSString *NS_Label	= [ [NSString alloc] initWithUTF8String:sLabel];
 		//[tracker sendTimingWithCategory:NS_Cat withValue:iInterval withName:NS_Name withLabel:NS_Label];
@@ -67,18 +67,21 @@ namespace ganalytics {
 		[tracker send:[[GAIDictionaryBuilder createTimingWithCategory:NS_Cat
 														interval:[NSNumber numberWithInt:iInterval]
 														name:NS_Name
-														label:NS_Label] build]];
+														label:NS_Label] build]];*/
 	}
 
-	void sendSocial( const char *sSocial_network , const char *sAction , const char *sTarget ){
-		NSString *NS_Net = [ [NSString alloc] initWithUTF8String:sSocial_network];
+	void sendSocial( const char *sData ){
+		/*NSString *NS_Net = [ [NSString alloc] initWithUTF8String:sSocial_network];
 		NSString *NS_Act = [ [NSString alloc] initWithUTF8String:sAction];
 		NSString *NS_Tgt = [ [NSString alloc] initWithUTF8String:sTarget];
 		//[tracker sendSocial:NS_Net withAction:NS_Act withTarget:NS_Tgt];
 		
 		[tracker send:[[GAIDictionaryBuilder createSocialWithNetwork:NS_Net
                                            action:NS_Act
-                                           target:NS_Tgt] build]];
+                                           target:NS_Tgt] build]];*/
+
+	}
+	void sendException( const char *sData ){
 
 	}
 
