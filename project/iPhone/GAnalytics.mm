@@ -6,10 +6,47 @@
 #import "GAIDictionaryBuilder.h"
 #import "GAIFields.h"
 
+@interface GAnalyticsController : NSObject<UIApplicationDelegate>
+@end
+
+@implementation GAnalyticsController
+
+	- (void)parseAdditionalParams:(GAIDictionaryBuilder*)builder withData:(NSDictionary*)responseDic
+    {
+    	NSLog(@"parseAdditionalParams");
+    	if ([[responseDic allKeys] containsObject:@"campaignData"]) {
+    		 NSString* deepLinkUrl = [responseDic objectForKey:@"campaignData"];
+			[builder setCampaignParametersFromUrl:deepLinkUrl];
+    	}
+    	if ([[responseDic allKeys] containsObject:@"productAction"]) {
+			 NSString* pAction = [responseDic objectForKey:@"productAction"];
+			 GAIEcommerceProductAction *action = [self createProductAction:pAction];
+			[builder setProductAction:action];
+		}
+    }
+    - (GAIEcommerceProductAction*) createProductAction:(NSString*)pAction
+    {
+    	GAIEcommerceProductAction *action = [[GAIEcommerceProductAction alloc] init];
+
+    	return action;
+    }
+
+@end
+
 namespace ganalytics {
 
 	static id<GAITracker> tracker;
-	
+
+	GAnalyticsController* getController()
+	{
+		static GAnalyticsController* controller = NULL;
+		if(controller == NULL)
+		{
+			controller = [[GAnalyticsController alloc] init];
+		}
+		return controller;
+	}
+
 	void startNewSession( const char *sUID , int iPeriod ){
 		NSString *NSUID = [NSString stringWithUTF8String:sUID];
 		//NSLog( @"startNewSession %@" , NSUID );
@@ -19,12 +56,16 @@ namespace ganalytics {
 
 	void sendScreenView(  const char *sScreen ) {
 		NSString *NSScreen = [[NSString alloc] initWithUTF8String:sScreen];
-		//NSLog( @"sendScreenView %@" , NSScreen );
-		// Set the screen name on the tracker so that it is used in all hits sent from this screen.
-		[tracker set:kGAIScreenName value:NSScreen];
-
+		NSData* data = [NSScreen dataUsingEncoding:NSUTF8StringEncoding];
+		NSDictionary *responseDic = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
+		NSString *screenName = [responseDic objectForKey:@"screenName"];
+		NSLog( @"sendScreenView %@" , screenName );
+		[tracker set:kGAIScreenName value:screenName];
+		GAIDictionaryBuilder *builder = [GAIDictionaryBuilder createScreenView];
+		GAnalyticsController* controller = getController();
+        [controller parseAdditionalParams:builder withData:responseDic];
 		// Send a screenview.
-		[tracker send:[[GAIDictionaryBuilder createAppView]  build]];
+		[tracker send:[builder build]];
 	}
 
 	void sendEvent( const char *sData){
@@ -33,7 +74,8 @@ namespace ganalytics {
 		NSString *NS_Lab = [ [NSString alloc] initWithUTF8String:sLabel];
 		//NSLog( @"SendEvent cat:%@ act:%@ label:%@ val%i" , NS_Cat , NS_Act , NS_Lab , iValue );
 		//[tracker sendEventWithCategory:NS_Cat withAction:NS_Act withLabel:NS_Lab withValue:[NSNumber numberWithInt:iValue]];
-		
+		//GAIDictionaryBuilder *builder = [[GAIDictionaryBuilder alloc] init];
+
 		[tracker send:[[GAIDictionaryBuilder createEventWithCategory:NS_Cat
                                                       action:NS_Act
                                                        label:NS_Lab
