@@ -227,7 +227,9 @@ public class GAnalytics extends Extension {
 					HitBuilders.SocialBuilder builder = new HitBuilders.SocialBuilder();
 					builder.setNetwork(jObject.getString("socialNetwork"));
 					builder.setAction(jObject.getString("socialAction"));
-					builder.setTarget(jObject.getString("socialTarget"));
+					if (jObject.has("socialTarget")) {
+						builder.setTarget(jObject.getString("socialTarget"));
+					}
 					parseAdditionalParams(builder, jObject);
 					_gaTracker.send(builder.build());
 					Log.v("GAnalytics", "trackSocial Success!" + builder.build());
@@ -248,7 +250,9 @@ public class GAnalytics extends Extension {
 				try {
 					JSONObject jObject = new JSONObject(datas);
 					HitBuilders.ExceptionBuilder builder = new HitBuilders.ExceptionBuilder();
-					builder.setDescription(jObject.getString("exceptionDescription"));
+					if (jObject.has("exceptionDescription")) {
+						builder.setDescription(jObject.getString("exceptionDescription"));
+					}
 					builder.setFatal(jObject.getBoolean("fatal"));
 					parseAdditionalParams(builder, jObject);
 					_gaTracker.send(builder.build());
