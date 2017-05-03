@@ -173,7 +173,9 @@ public class GAnalytics extends Extension {
 					HitBuilders.EventBuilder builder = new HitBuilders.EventBuilder();
 					builder.setCategory(jObject.getString("eventCategory"));
 					builder.setAction(jObject.getString("eventAction"));
-					builder.setLabel(jObject.getString("eventLabel"));
+					if (jObject.has("eventLabel")) {
+						builder.setLabel(jObject.getString("eventLabel"));
+					}
 					if (jObject.has("eventValue")) {
 						builder.setValue(jObject.getLong("eventValue"));
 					}

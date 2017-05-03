@@ -12,7 +12,7 @@ namespace ganalytics {
 	void sendTiming( const char *sData );
 	void sendException( const char *sData );
 	void stopSession( );
-	void stopSession( );
+	void setCustomParams(const char *data);
 
 }
 

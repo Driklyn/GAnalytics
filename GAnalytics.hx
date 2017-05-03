@@ -88,6 +88,7 @@ typedef THitBuilder =
 	@:optional var productAction:TProductAction;
 	@:optional var promotion:TPromotion;
 	@:optional var impressionList:String;
+	@:optional var impressionSource:String;
 	@:optional var promotionAction:EPromotionActionType;
 	@:optional var nonInteraction:Bool;
 	@:optional var setNewSession:Bool;
@@ -101,7 +102,7 @@ typedef TEventHitBuilder =
 	> THitBuilder,
 	var eventCategory:String;
 	var eventAction:String;
-	var eventLabel:String;
+	@:optional var eventLabel:String;
 	@:optional var eventValue:Int;
 }
 
@@ -114,7 +115,7 @@ typedef TAppViewHitBuilder =
 typedef TExceptionHitBuilder =
 {
 	> THitBuilder,
-	var exceptionDescription:String;
+	@:optional var exceptionDescription:String;
 	var fatal:Bool;
 }
 
@@ -123,15 +124,15 @@ typedef TSocialHitBuilder =
 	> THitBuilder,
 	var socialNetwork:String;
 	var socialAction:String;
-	var socialTarget:String;
+	@:optional var socialTarget:String;
 }
 
 typedef TTimingHitBuilder =
 {
 	> THitBuilder,
 	var timingCategory:String;
-	var timingVariable:String;
 	var timingValue:Int;
+	var timingVariable:String;
 	@:optional var timingLabel:String;
 }
 
