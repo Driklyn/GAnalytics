@@ -6,6 +6,9 @@
 	<set name="mobile" value="1" if="android"/>
 	<set name="mobile" value="1" if="blackberry"/>
 	<set name="mobile" value="1" if="webos"/>
+
+	<set name="SLIBEXT" value=".lib" if="windows"/>
+	<set name="SLIBEXT" value=".a" unless="windows"/>
 	
 	<files id="common">
 		<compilerflag value="-Iinclude"/>
