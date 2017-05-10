@@ -149,7 +149,7 @@ public class GAnalytics extends Extension {
 				try {
 					JSONObject jObject = new JSONObject(datas);
 
-					_gaTracker.setScreenName( jObject.get("screenName").toString() );
+					_gaTracker.setScreenName( jObject.getString("screenName"));
 
 					HitBuilders.ScreenViewBuilder builder = new HitBuilders.ScreenViewBuilder();
 					parseAdditionalParams(builder, jObject);
@@ -271,7 +271,7 @@ public class GAnalytics extends Extension {
 					cArg[0] = String.class;
 					Method builderMethod = builder.getClass().getMethod("setCampaignParamsFromUrl", cArg);
 					try {
-						builderMethod.invoke(builder, jObject.get("campaignData").toString());
+						builderMethod.invoke(builder, jObject.getString("campaignData"));
 					} catch (Exception e) {
 						Log.e("GAnalytics", "campaignData: " + e);
 					}
@@ -282,7 +282,7 @@ public class GAnalytics extends Extension {
 					cArg[0] = String.class;
 					Method builderMethod = builder.getClass().getMethod("setPromotionAction", cArg);
 					try {
-						builderMethod.invoke(builder, jObject.get("promotionAction").toString());
+						builderMethod.invoke(builder, jObject.getString("promotionAction"));
 					} catch (Exception e) {
 						Log.e("GAnalytics", "promotionAction: " + e);
 					}
@@ -294,7 +294,7 @@ public class GAnalytics extends Extension {
 					cArg[1] = String.class;
 					Method builderMethod = builder.getClass().getMethod("addImpression", cArg);
 					try {
-						builderMethod.invoke(builder, getProduct(jObject.getJSONObject("product")), jObject.get("impressionList").toString());
+						builderMethod.invoke(builder, getProduct(jObject.getJSONObject("product")), jObject.getString("impressionList"));
 					} catch (Exception e) {
 						Log.e("GAnalytics", "impressionList: " + e);
 					}
@@ -365,7 +365,7 @@ public class GAnalytics extends Extension {
 						Iterator<String> keys = cdObject.keys();
 						while (keys.hasNext()) {
 							String key = (String) keys.next();
-							builderMethod.invoke(builder, Integer.parseInt(key), cdObject.get(key).toString());
+							builderMethod.invoke(builder, Integer.parseInt(key), cdObject.getString(key));
 						}
 					}
 				} catch (Exception e) {
@@ -382,7 +382,7 @@ public class GAnalytics extends Extension {
 						Iterator<String> keys = cmObject.keys();
 						while (keys.hasNext()) {
 							String key = (String) keys.next();
-							builderMethod.invoke(builder, Integer.parseInt(key), Float.parseFloat(cmObject.get(key).toString()));
+							builderMethod.invoke(builder, Integer.parseInt(key), Float.parseFloat(cmObject.getString(key)));
 						}
 					}
 				} catch (Exception e) {
@@ -445,16 +445,16 @@ public class GAnalytics extends Extension {
 			Promotion p = new Promotion();
 			try {
 				if (promoObject.has("id")) {
-					p.setId(promoObject.get("id").toString());
+					p.setId(promoObject.getString("id"));
 				}
 				if (promoObject.has("creative")) {
-					p.setCreative(promoObject.get("creative").toString());
+					p.setCreative(promoObject.getString("creative"));
 				}
 				if (promoObject.has("name")) {
-					p.setName(promoObject.get("name").toString());
+					p.setName(promoObject.getString("name"));
 				}
 				if (promoObject.has("position")) {
-					p.setPosition(promoObject.get("position").toString());
+					p.setPosition(promoObject.getString("position"));
 				}
 			} catch (Exception e) {
 				Log.e("GAnalytics", "getPromotion: " + e);
@@ -466,31 +466,31 @@ public class GAnalytics extends Extension {
 			Product p = new Product();
 			try {
 				if (productObject.has("id")) {
-					p.setId(productObject.get("id").toString());
+					p.setId(productObject.getString("id"));
 				}
 				if (productObject.has("name")) {
-					p.setName(productObject.get("name").toString());
+					p.setName(productObject.getString("name"));
 				}
 				if (productObject.has("brand")) {
-					p.setBrand(productObject.get("brand").toString());
+					p.setBrand(productObject.getString("brand"));
 				}
 				if (productObject.has("category")) {
-					p.setCategory(productObject.get("category").toString());
+					p.setCategory(productObject.getString("category"));
 				}
 				if (productObject.has("couponCode")) {
-					p.setCouponCode(productObject.get("couponCode").toString());
+					p.setCouponCode(productObject.getString("couponCode"));
 				}
 				if (productObject.has("position")) {
-					p.setPosition(Integer.parseInt(productObject.get("position").toString()));
+					p.setPosition(productObject.getInt("position"));
 				}
 				if (productObject.has("price")) {
-					p.setPrice(Double.parseDouble(productObject.get("price").toString()));
+					p.setPrice(productObject.getDouble("price"));
 				}
 				if (productObject.has("quantity")) {
-					p.setQuantity(Integer.parseInt(productObject.get("quantity").toString()));
+					p.setQuantity(productObject.getInt("quantity"));
 				}
 				if (productObject.has("variant")) {
-					p.setVariant(productObject.get("variant").toString());
+					p.setVariant(productObject.getString("variant"));
 				}
 				try {
 					if (productObject.has("customDimensions")) {
@@ -498,7 +498,7 @@ public class GAnalytics extends Extension {
 						Iterator<String> keys = cdObject.keys();
 						while (keys.hasNext()) {
 							String key = (String) keys.next();
-							p.setCustomDimension(Integer.parseInt(key), cdObject.get(key).toString());
+							p.setCustomDimension(Integer.parseInt(key), cdObject.getString(key));
 						}
 					}
 				} catch (Exception e) {
@@ -510,7 +510,7 @@ public class GAnalytics extends Extension {
 						Iterator<String> keys = cmObject.keys();
 						while (keys.hasNext()) {
 							String key = (String) keys.next();
-							p.setCustomMetric(Integer.parseInt(key), Integer.parseInt(cmObject.get(key).toString()));
+							p.setCustomMetric(Integer.parseInt(key), Integer.parseInt(cmObject.getString(key)));
 						}
 					}
 				} catch (Exception e) {
