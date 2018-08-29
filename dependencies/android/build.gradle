@@ -3,10 +3,12 @@ buildscript {
         maven {
             url "http://repo1.maven.org/maven2/"
         }
+		maven { url 'https://dl.google.com/dl/android/maven2/' }
+		jcenter()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:2.1.0'
-        classpath 'com.google.gms:google-services:3.0.0'
+        //classpath 'com.google.gms:google-services:4.0.1'
     }
 }
 
@@ -25,6 +27,9 @@ android {
 }
 
 dependencies {
+	repositories {
+        maven { url 'https://dl.google.com/dl/android/maven2/' }
+    }
     compile project(':deps:extension-api')
-    compile 'com.google.android.gms:play-services-analytics:+'
+    compile 'com.google.android.gms:play-services-analytics:16.0.1'
 }
