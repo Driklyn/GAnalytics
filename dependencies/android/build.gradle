@@ -1,7 +1,7 @@
 buildscript {
     repositories {
         google()
-		jcenter()
+	jcenter()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:2.1.0'
@@ -25,8 +25,8 @@ android {
 
 dependencies {
     repositories {
-		google()
-	}
+	google()
+    }
     compile project(':deps:extension-api')
     compile 'com.google.android.gms:play-services-analytics:16.0.4'
 }
