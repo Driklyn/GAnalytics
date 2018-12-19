@@ -27,6 +27,6 @@ dependencies {
     repositories {
 	google()
     }
-    compile project(':deps:extension-api')
+    api project(':deps:extension-api')
     implementation 'com.google.android.gms:play-services-analytics:16.0.4'
 }
