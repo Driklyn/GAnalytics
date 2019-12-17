@@ -29,34 +29,19 @@ using namespace ganalytics;
 	}
 	DEFINE_PRIM( ganalytics_sendScreenView , 1 );
 
-	static value ganalytics_sendEvent( value sCat , value sAction , value sLabel , value iValue ){
+	static value ganalytics_sendEvent( value data){
 		sendEvent(
-					val_string( sCat ),
-					val_string( sAction ),
-					val_string( sLabel ),
-					val_int( iValue )
+					val_string( data )
 				);
 		return alloc_null( );
 	}
-	DEFINE_PRIM( ganalytics_sendEvent , 4 );
+	DEFINE_PRIM( ganalytics_sendEvent , 1 );
 
-	static value ganalytics_setCustom_dimension( value iIndex , value sValue ){
-		setCustom_dimension( val_int( iIndex ) , val_string( sValue ) );
+	static value ganalytics_sendTiming( value data){
+		sendTiming( val_string( data ) );
 		return alloc_null( );
 	}
-	DEFINE_PRIM( ganalytics_setCustom_dimension , 2 );
-
-	static value ganalytics_setCustom_metric( value iIndex , value iMetric ){
-		setCustom_metric( val_int( iIndex ) , val_int( iMetric ) );
-		return alloc_null( );
-	}
-	DEFINE_PRIM( ganalytics_setCustom_metric , 2 );
-
-	static value ganalytics_sendTiming( value sCat , value name , value label , value value ){
-		sendTiming( val_string( sCat ) , val_string( name ) , val_string( label ) , val_int( value ) );
-		return alloc_null( );
-	}
-	DEFINE_PRIM( ganalytics_sendTiming , 4 );
+	DEFINE_PRIM( ganalytics_sendTiming , 1 );
 
 	static value ganalytics_stopSession( ){
 		stopSession( );
@@ -64,11 +49,17 @@ using namespace ganalytics;
 	}
 	DEFINE_PRIM( ganalytics_stopSession , 0 );
 
-	static value ganalytics_sendSocial( value sNetwork , value sAction , value sTarget ){
-		sendSocial( val_string( sNetwork ) , val_string( sAction ) , val_string( sTarget ) );
+	static value ganalytics_sendSocial( value data ){
+		sendSocial( val_string( data ));
 		return alloc_null( );
 	}
-	DEFINE_PRIM( ganalytics_sendSocial , 3 );
+	DEFINE_PRIM( ganalytics_sendSocial , 1 );
+
+	static value ganalytics_sendException( value data ){
+		sendException( val_string( data ));
+		return alloc_null( );
+	}
+	DEFINE_PRIM( ganalytics_sendException , 1 );
 
 #endif
 

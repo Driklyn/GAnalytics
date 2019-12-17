@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="org.haxe.extension.ganalytics">
-	
+	<uses-sdk android:minSdkVersion="::ANDROID_MINIMUM_SDK_VERSION::" android:targetSdkVersion="::ANDROID_TARGET_SDK_VERSION::"/>
 	<!-- Google Analytics permissions -->
 		<uses-permission android:name="android.permission.INTERNET" />
 		<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 	
 	<!-- Optional : Register AnalyticsReceiver and AnalyticsService to support background dispatching on non-Google Play devices -->
-		<uses-permission android:name="android.permission.WAKE_LOCK" />
+		<!--<uses-permission android:name="android.permission.WAKE_LOCK" />
 		<application>
 			<service android:name="com.google.android.gms.analytics.AnalyticsService" android:enabled="true" android:exported="false" />
 			<receiver android:name="com.google.android.gms.analytics.AnalyticsReceiver" android:enabled="true">
@@ -14,16 +14,19 @@
 					<action android:name="com.google.android.gms.analytics.ANALYTICS_DISPATCH" />
 				</intent-filter>
 			</receiver>
-		</application>
+		</application>-->
 
 	<!-- Optional : Used for Google Play Store Campaign Measurement -->
-		<!--<application>
-			<service android:name="com.google.analytics.tracking.android.CampaignTrackingService" />
-			<receiver android:name="com.google.analytics.tracking.android.CampaignTrackingReceiver" android:exported="true">
+		<application>
+			<receiver android:name="com.google.android.gms.analytics.CampaignTrackingReceiver"
+					  android:enabled="true">
 				<intent-filter>
 					<action android:name="com.android.vending.INSTALL_REFERRER" />
 				</intent-filter>
 			</receiver>
-		</application>-->
+			<service android:name="com.google.android.gms.analytics.CampaignTrackingService"
+					 android:enabled="true"
+					 android:exported="false"/>
+		</application>
 	
 </manifest>

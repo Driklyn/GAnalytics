@@ -5,6 +5,12 @@ import com.google.android.gms.analytics.ExceptionReporter;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
+import com.google.android.gms.analytics.ecommerce.Product;
+import com.google.android.gms.analytics.ecommerce.Promotion;
+import com.google.android.gms.analytics.ecommerce.ProductAction;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 
 import android.app.Activity;
@@ -14,6 +20,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
+import java.util.*;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import android.util.Log;
+import java.util.Map.Entry;
 
 /* 
 	You can use the Android Extension class in order to hook
@@ -92,7 +104,8 @@ public class GAnalytics extends Extension {
 		public static void startSession( String sUA_code , int iPeriod ) {
 			//trace("startSession ::: "+sUA_code+" - "+iPeriod);
 			_gaTracker = GoogleAnalytics.getInstance( mainContext ).newTracker( sUA_code );
-			_gaTracker.enableExceptionReporting( true );
+			_gaTracker.enableExceptionReporting(true);
+			_gaTracker.enableAdvertisingIdCollection(true);
 			setDispatch_period( iPeriod );
 			
 			Thread.UncaughtExceptionHandler handler = new ExceptionReporter(
@@ -130,58 +143,383 @@ public class GAnalytics extends Extension {
 		* @public
 		* @return	void
 		*/
-		public static void trackScreen( String sScreen ){
-			//trace("trackScreen ::: "+sScreen);
-			_gaTracker.setScreenName( sScreen );
-			_gaTracker.send( new HitBuilders.ScreenViewBuilder().build() );
+		public static void trackScreen( String datas )
+		{
+			if (datas != null) {
+				try {
+					JSONObject jObject = new JSONObject(datas);
 
+					_gaTracker.setScreenName( jObject.getString("screenName"));
+
+					HitBuilders.ScreenViewBuilder builder = new HitBuilders.ScreenViewBuilder();
+					parseAdditionalParams(builder, jObject);
+					_gaTracker.send(builder.build());
+					Log.v("GAnalytics", "trackScreen Success!" + builder.build());
+				} catch (final JSONException e) {
+					Log.e("GAnalytics", "trackScreen Json parsing error: " + e);
+				}
+			}
+		}
+		/**
+		 *
+		 *
+		 * @public
+		 * @return	void
+		 */
+		public static void trackEvent(String datas){
+			if (datas != null) {
+				try {
+					JSONObject jObject = new JSONObject(datas);
+					HitBuilders.EventBuilder builder = new HitBuilders.EventBuilder();
+					builder.setCategory(jObject.getString("eventCategory"));
+					builder.setAction(jObject.getString("eventAction"));
+					if (jObject.has("eventLabel")) {
+						builder.setLabel(jObject.getString("eventLabel"));
+					}
+					if (jObject.has("eventValue")) {
+						builder.setValue(jObject.getLong("eventValue"));
+					}
+					parseAdditionalParams(builder, jObject);
+					_gaTracker.send(builder.build());
+					Log.v("GAnalytics", "trackEvent Success!" + builder.build());
+				} catch (final JSONException e) {
+					Log.e("GAnalytics", "trackEvent Json parsing error: " + e);
+				}
+			}
+		}
+		/**
+		 *
+		 *
+		 * @public
+		 * @return	void
+		 */
+		public static void sendTiming(String datas){
+			if (datas != null) {
+				try {
+					JSONObject jObject = new JSONObject(datas);
+					HitBuilders.TimingBuilder builder = new HitBuilders.TimingBuilder();
+					builder.setCategory(jObject.getString("timingCategory"));
+					builder.setVariable(jObject.getString("timingVariable"));
+					builder.setValue(jObject.getLong("timingValue"));
+					if (jObject.has("timingLabel")) {
+						builder.setLabel(jObject.getString("timingLabel"));
+					}
+					parseAdditionalParams(builder, jObject);
+					_gaTracker.send(builder.build());
+					Log.v("GAnalytics", "sendTiming Success!" + builder.build());
+				} catch (final JSONException e) {
+					Log.e("GAnalytics", "sendTiming Json parsing error: " + e);
+				}
+			}
 		}
 
 		/**
-		*
-		*
-		* @public
-		* @return	void
-		*/
-		public static void trackEvent( String sCat , String sAction , String sLabel , int iVal ){
-			_gaTracker.send( new HitBuilders.EventBuilder()
-				.setCategory( sCat )
-				.setAction( sAction )
-				.setLabel( sLabel )
-				.setValue( Long.valueOf( iVal ) )
-				.build()
-			);
+		 *
+		 *
+		 * @public
+		 * @return	void
+		 */
+		public static void trackSocial( String datas ){
+
+			if (datas != null) {
+				try {
+					JSONObject jObject = new JSONObject(datas);
+					HitBuilders.SocialBuilder builder = new HitBuilders.SocialBuilder();
+					builder.setNetwork(jObject.getString("socialNetwork"));
+					builder.setAction(jObject.getString("socialAction"));
+					if (jObject.has("socialTarget")) {
+						builder.setTarget(jObject.getString("socialTarget"));
+					}
+					parseAdditionalParams(builder, jObject);
+					_gaTracker.send(builder.build());
+					Log.v("GAnalytics", "trackSocial Success!" + builder.build());
+				} catch (final JSONException e) {
+					Log.e("GAnalytics", "trackSocial Json parsing error: " + e);
+				}
+			}
+		}
+		/**
+		 *
+		 *
+		 * @public
+		 * @return	void
+		 */
+		public static void trackException( String datas ){
+
+			if (datas != null) {
+				try {
+					JSONObject jObject = new JSONObject(datas);
+					HitBuilders.ExceptionBuilder builder = new HitBuilders.ExceptionBuilder();
+					if (jObject.has("exceptionDescription")) {
+						builder.setDescription(jObject.getString("exceptionDescription"));
+					}
+					builder.setFatal(jObject.getBoolean("fatal"));
+					parseAdditionalParams(builder, jObject);
+					_gaTracker.send(builder.build());
+					Log.v("GAnalytics", "trackException Success!" + builder.build());
+				} catch (final JSONException e) {
+					Log.e("GAnalytics", "trackException Json parsing error: " + e);
+				}
+			}
 		}
 
-		/**
-		*
-		*
-		* @public
-		* @return	void
-		*/
-		public static void trackSocial( String sSocial_network , String sAction , String sTarget ){
-			_gaTracker.send( new HitBuilders.SocialBuilder()
-				.setNetwork( sSocial_network )
-				.setAction( sAction )
-				.setTarget( sTarget )
-				.build()
-			);
-		}
+		private static void parseAdditionalParams(Object builder, JSONObject jObject)
+		{
+			try {
+				if (jObject.has("campaignData")) {
+					Class[] cArg = new Class[1];
+					cArg[0] = String.class;
+					Method builderMethod = builder.getClass().getMethod("setCampaignParamsFromUrl", cArg);
+					try {
+						builderMethod.invoke(builder, jObject.getString("campaignData"));
+					} catch (Exception e) {
+						Log.e("GAnalytics", "campaignData: " + e);
+					}
+				}
 
-		/**
-		*
-		*
-		* @public
-		* @return	void
-		*/
-		public static void sendTiming( String sCat , String sName , String sLabel, int iVal ){
-			_gaTracker.send( new HitBuilders.TimingBuilder()
-				.setCategory( sCat )
-				.setVariable( sName )
-				.setLabel( sLabel )
-				.setValue( Long.valueOf( iVal ) )
-				.build()
-			);
+				if (jObject.has("promotionAction")) {
+					Class[] cArg = new Class[1];
+					cArg[0] = String.class;
+					Method builderMethod = builder.getClass().getMethod("setPromotionAction", cArg);
+					try {
+						builderMethod.invoke(builder, jObject.getString("promotionAction"));
+					} catch (Exception e) {
+						Log.e("GAnalytics", "promotionAction: " + e);
+					}
+				}
+
+				if (jObject.has("impressionList") && jObject.has("product")) {
+					Class[] cArg = new Class[2];
+					cArg[0] = Product.class;
+					cArg[1] = String.class;
+					Method builderMethod = builder.getClass().getMethod("addImpression", cArg);
+					try {
+						builderMethod.invoke(builder, getProduct(jObject.getJSONObject("product")), jObject.getString("impressionList"));
+					} catch (Exception e) {
+						Log.e("GAnalytics", "impressionList: " + e);
+					}
+				} else if (jObject.has("product")) {
+					Class[] cArg = new Class[1];
+					cArg[0] = Product.class;
+					Method builderMethod = builder.getClass().getMethod("addProduct", cArg);
+					try {
+						builderMethod.invoke(builder, getProduct(jObject.getJSONObject("product")));
+					} catch (Exception e) {
+						Log.e("GAnalytics", "impressionList: " + e);
+					}
+				}
+
+				if (jObject.has("promotion")) {
+					Class[] cArg = new Class[1];
+					cArg[0] = Promotion.class;
+					Method builderMethod = builder.getClass().getMethod("addPromotion", cArg);
+					try {
+						builderMethod.invoke(builder, getPromotion(jObject.getJSONObject("promotion")));
+					} catch (Exception e) {
+						Log.e("GAnalytics", "impressionList: " + e);
+					}
+				}
+
+				if (jObject.has("productAction")) {
+					Class[] cArg = new Class[1];
+					cArg[0] = ProductAction.class;
+					Method builderMethod = builder.getClass().getMethod("setProductAction", cArg);
+					try {
+						builderMethod.invoke(builder, getProductAction(jObject.getJSONObject("productAction")));
+					} catch (Exception e) {
+						Log.e("GAnalytics", "impressionList: " + e);
+					}
+				}
+
+				if (jObject.has("nonInteraction")) {
+					Class[] cArg = new Class[1];
+					cArg[0] = boolean.class;
+					Method builderMethod = builder.getClass().getMethod("setNonInteraction", cArg);
+					try {
+						builderMethod.invoke(builder, jObject.getBoolean("nonInteraction"));
+					} catch (Exception e) {
+						Log.e("GAnalytics", "nonInteraction: " + e);
+					}
+				}
+
+				if (jObject.has("setNewSession")) {
+					boolean ns = jObject.getBoolean("setNewSession");
+					if (ns) {
+						Method builderMethod = builder.getClass().getMethod("setNewSession");
+						try {
+							builderMethod.invoke(builder);
+						} catch (Exception e) {
+							Log.e("GAnalytics", "setNewSession: " + e);
+						}
+					}
+				}
+
+				try {
+					if (jObject.has("customDimensions")) {
+						Class[] cArg = new Class[2];
+						cArg[0] = int.class;
+						cArg[1] = String.class;
+						Method builderMethod = builder.getClass().getMethod("setCustomDimension", cArg);
+
+						JSONObject cdObject = jObject.getJSONObject("customDimensions");
+						Iterator<String> keys = cdObject.keys();
+						while (keys.hasNext()) {
+							String key = (String) keys.next();
+							builderMethod.invoke(builder, Integer.parseInt(key), cdObject.getString(key));
+						}
+					}
+				} catch (Exception e) {
+					Log.e("GAnalytics", "customDimensions: " + e);
+				}
+				try {
+					if (jObject.has("customMetrics")) {
+						Class[] cArg = new Class[2];
+						cArg[0] = int.class;
+						cArg[1] = float.class;
+						Method builderMethod = builder.getClass().getMethod("setCustomMetric", cArg);
+
+						JSONObject cmObject = jObject.getJSONObject("customMetrics");
+						Iterator<String> keys = cmObject.keys();
+						while (keys.hasNext()) {
+							String key = (String) keys.next();
+							builderMethod.invoke(builder, Integer.parseInt(key), Float.parseFloat(cmObject.getString(key)));
+						}
+					}
+				} catch (Exception e) {
+					Log.e("GAnalytics", "customMetrics: " + e);
+				}
+
+
+
+
+			} catch (Exception e) {
+				Log.e("GAnalytics", "parseAdditionalParams: " + e);
+			}
+		}
+		private static ProductAction getProductAction (JSONObject paObject) {
+			Log.d("GAnalytics", "getProductAction_: " + paObject);
+			try {
+				ProductAction p = new ProductAction(paObject.getString("action"));
+				try {
+					if (paObject.has("checkoutOptions")) {
+						p.setCheckoutOptions(paObject.getString("checkoutOptions"));
+					}
+					if (paObject.has("checkoutStep")) {
+						p.setCheckoutStep(paObject.getInt("checkoutStep"));
+					}
+					if (paObject.has("productionActionList")) {
+						p.setProductActionList(paObject.getString("productionActionList"));
+					}
+					if (paObject.has("productionListSource")) {
+						p.setProductListSource(paObject.getString("productionListSource"));
+					}
+					if (paObject.has("transactionAffiliation")) {
+						p.setTransactionAffiliation(paObject.getString("transactionAffiliation"));
+					}
+					if (paObject.has("transactionCouponCode")) {
+						p.setTransactionCouponCode(paObject.getString("transactionCouponCode"));
+					}
+					if (paObject.has("transactionId")) {
+						p.setTransactionId(paObject.getString("transactionId"));
+					}
+					if (paObject.has("transactionRevenue")) {
+						p.setTransactionRevenue(paObject.getDouble("transactionRevenue"));
+					}
+					if (paObject.has("transactionShipping")) {
+						p.setTransactionShipping(paObject.getDouble("transactionShipping"));
+					}
+					if (paObject.has("transactionTax")) {
+						p.setTransactionTax(paObject.getDouble("transactionTax"));
+					}
+				} catch (Exception e) {
+					Log.e("GAnalytics", "getProductAction1: " + e);
+				}
+				return p;
+			} catch (Exception e) {
+				Log.e("GAnalytics", "getProductAction0: " + e);
+			}
+			return null;
+		}
+		private static Promotion getPromotion (JSONObject promoObject) {
+			Log.d("GAnalytics", "getPromotion: " + promoObject);
+			Promotion p = new Promotion();
+			try {
+				if (promoObject.has("id")) {
+					p.setId(promoObject.getString("id"));
+				}
+				if (promoObject.has("creative")) {
+					p.setCreative(promoObject.getString("creative"));
+				}
+				if (promoObject.has("name")) {
+					p.setName(promoObject.getString("name"));
+				}
+				if (promoObject.has("position")) {
+					p.setPosition(promoObject.getString("position"));
+				}
+			} catch (Exception e) {
+				Log.e("GAnalytics", "getPromotion: " + e);
+			}
+			return p;
+		}
+		private static Product getProduct (JSONObject productObject) {
+			Log.d("GAnalytics", "product type: " + productObject);
+			Product p = new Product();
+			try {
+				if (productObject.has("id")) {
+					p.setId(productObject.getString("id"));
+				}
+				if (productObject.has("name")) {
+					p.setName(productObject.getString("name"));
+				}
+				if (productObject.has("brand")) {
+					p.setBrand(productObject.getString("brand"));
+				}
+				if (productObject.has("category")) {
+					p.setCategory(productObject.getString("category"));
+				}
+				if (productObject.has("couponCode")) {
+					p.setCouponCode(productObject.getString("couponCode"));
+				}
+				if (productObject.has("position")) {
+					p.setPosition(productObject.getInt("position"));
+				}
+				if (productObject.has("price")) {
+					p.setPrice(productObject.getDouble("price"));
+				}
+				if (productObject.has("quantity")) {
+					p.setQuantity(productObject.getInt("quantity"));
+				}
+				if (productObject.has("variant")) {
+					p.setVariant(productObject.getString("variant"));
+				}
+				try {
+					if (productObject.has("customDimensions")) {
+						JSONObject cdObject = productObject.getJSONObject("customDimensions");
+						Iterator<String> keys = cdObject.keys();
+						while (keys.hasNext()) {
+							String key = (String) keys.next();
+							p.setCustomDimension(Integer.parseInt(key), cdObject.getString(key));
+						}
+					}
+				} catch (Exception e) {
+					Log.e("GAnalytics", "customDimensions: " + e);
+				}
+				try {
+					if (productObject.has("customMetrics")) {
+						JSONObject cmObject = productObject.getJSONObject("customMetrics");
+						Iterator<String> keys = cmObject.keys();
+						while (keys.hasNext()) {
+							String key = (String) keys.next();
+							p.setCustomMetric(Integer.parseInt(key), Integer.parseInt(cmObject.getString(key)));
+						}
+					}
+				} catch (Exception e) {
+					Log.e("GAnalytics", "customMetrics: " + e);
+				}
+			} catch (Exception e) {
+				Log.e("GAnalytics", "getProduct: " + e);
+			}
+			return p;
 		}
 
 	// -------o protected
